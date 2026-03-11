@@ -1,63 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SalesFlow Dashboard</title>
 <style>
+  :root {
+    --bg: #0f1117;
+    --bg-card: #161922;
+    --border: #1e2130;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-secondary: #94a3b8;
+    --text-bright: #fff;
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --primary-bg: rgba(99,102,241,0.1);
+    --hover-bg: #1e2130;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --cyan: #06b6d4;
+    --sidebar-w: 240px;
+    --sidebar-collapsed-w: 64px;
+  }
+  [data-theme="light"] {
+    --bg: #f1f5f9;
+    --bg-card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --text-secondary: #475569;
+    --text-bright: #0f172a;
+    --hover-bg: #f1f5f9;
+    --primary-bg: rgba(99,102,241,0.08);
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Segoe UI', -apple-system, sans-serif;
-    background: #0f1117;
-    color: #e2e8f0;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
   }
   .layout { display: flex; min-height: 100vh; }
 
   /* Sidebar */
   .sidebar {
-    width: 240px;
-    background: #161922;
-    border-right: 1px solid #1e2130;
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
     padding: 24px 16px;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    transition: width 0.3s, min-width 0.3s, padding 0.3s;
+    overflow: hidden;
+    position: relative;
+    z-index: 100;
   }
+  .sidebar.collapsed { width: var(--sidebar-collapsed-w); min-width: var(--sidebar-collapsed-w); padding: 24px 8px; }
+  .sidebar.collapsed .nav-text, .sidebar.collapsed .logo-text { display: none; }
+  .sidebar.collapsed .logo { padding: 0 0 24px; justify-content: center; }
+  .sidebar.collapsed .nav-item { justify-content: center; padding: 10px; }
   .logo {
     font-size: 20px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-bright);
     padding: 0 12px 24px;
-    border-bottom: 1px solid #1e2130;
+    border-bottom: 1px solid var(--border);
     margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
   }
-  .logo span { color: #6366f1; }
+  .logo span { color: var(--primary); }
   .nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
     border-radius: 8px;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
+    white-space: nowrap;
+    user-select: none;
   }
-  .nav-item:hover { background: #1e2130; color: #cbd5e1; }
-  .nav-item.active { background: rgba(99,102,241,0.1); color: #818cf8; }
-  .nav-icon { width: 20px; text-align: center; }
+  .nav-item:hover { background: var(--hover-bg); color: var(--text-secondary); }
+  .nav-item.active { background: var(--primary-bg); color: var(--primary-light); }
+  .nav-icon { width: 20px; text-align: center; font-size: 16px; flex-shrink: 0; }
+  .sidebar-toggle {
+    position: absolute;
+    top: 28px;
+    right: -14px;
+    width: 28px;
+    height: 28px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 101;
+    transition: transform 0.3s;
+  }
+  .sidebar.collapsed .sidebar-toggle { transform: rotate(180deg); }
 
   /* Main */
-  .main { flex: 1; padding: 32px; overflow-y: auto; }
+  .main { flex: 1; padding: 24px 32px; overflow-y: auto; max-height: 100vh; }
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  .header h1 { font-size: 24px; font-weight: 700; }
-  .header-right { display: flex; gap: 12px; align-items: center; }
+  .header h1 { font-size: 24px; font-weight: 700; color: var(--text-bright); }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .btn {
     padding: 8px 16px;
     border-radius: 8px;
@@ -65,46 +133,151 @@
     font-size: 14px;
     cursor: pointer;
     font-weight: 500;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .btn-primary { background: #6366f1; color: #fff; }
-  .btn-ghost { background: #1e2130; color: #cbd5e1; border: 1px solid #2d3148; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-ghost { background: var(--hover-bg); color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-sm { padding: 5px 12px; font-size: 13px; }
   .date-badge {
-    background: #1e2130;
+    background: var(--hover-bg);
     padding: 8px 14px;
     border-radius: 8px;
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border: 1px solid var(--border);
+    position: relative;
+    user-select: none;
   }
+  .date-badge:hover { border-color: var(--primary); }
+
+  /* Icon buttons in header */
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { border-color: var(--primary); color: var(--primary-light); }
+  .icon-btn .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    background: var(--red);
+    border-radius: 50%;
+    font-size: 10px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  /* Dropdowns */
+  .dropdown-wrapper { position: relative; }
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    min-width: 280px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+    z-index: 200;
+    display: none;
+    overflow: hidden;
+  }
+  .dropdown.open { display: block; animation: dropIn 0.2s ease; }
+  @keyframes dropIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .dropdown-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-bright);
+  }
+  .dropdown-item {
+    padding: 12px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+    color: var(--text);
+  }
+  .dropdown-item:hover { background: var(--hover-bg); }
+  .dropdown-divider { border-top: 1px solid var(--border); margin: 4px 0; }
+  .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+  .notif-text { flex: 1; }
+  .notif-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .user-avatar-header {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #a855f7);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  .user-avatar-header:hover { box-shadow: 0 0 0 3px var(--primary-bg); }
+  .user-dropdown { min-width: 200px; }
+  .user-dropdown .dropdown-header { display: flex; flex-direction: column; gap: 2px; }
+  .user-dropdown .dropdown-header small { color: var(--text-muted); font-weight: 400; font-size: 12px; }
 
   /* Stats Grid */
   .stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
   .stat-card {
-    background: #161922;
-    border: 1px solid #1e2130;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
   }
-  .stat-label { font-size: 13px; color: #64748b; margin-bottom: 8px; }
-  .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
+  .stat-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+  .stat-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--text-bright); }
   .stat-change { font-size: 13px; margin-top: 6px; }
-  .stat-change.up { color: #22c55e; }
-  .stat-change.down { color: #ef4444; }
+  .stat-change.up { color: var(--green); }
+  .stat-change.down { color: var(--red); }
 
   /* Charts Row */
   .charts-row {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 16px;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
   .card {
-    background: #161922;
-    border: 1px solid #1e2130;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
   }
@@ -115,36 +288,139 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: var(--text-bright);
   }
-  .card-title span { color: #64748b; font-size: 13px; font-weight: 400; }
-
-  /* Chart SVG */
-  .chart-area { width: 100%; height: 200px; }
+  .card-title span { color: var(--text-muted); font-size: 13px; font-weight: 400; }
+  .chart-toggles { display: flex; gap: 4px; }
+  .chart-toggle {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chart-toggle.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .chart-area { width: 100%; height: 200px; display: block; }
+  .chart-tooltip {
+    position: absolute;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 50;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    display: none;
+    color: var(--text);
+  }
+  .chart-tooltip .tt-label { color: var(--text-muted); font-size: 11px; }
+  .chart-tooltip .tt-value { color: var(--text-bright); font-weight: 600; font-size: 15px; }
+  .revenue-chart-wrap { position: relative; }
 
   /* Donut */
   .donut-container { display: flex; align-items: center; gap: 24px; }
-  .donut-legend { display: flex; flex-direction: column; gap: 12px; }
-  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .donut-wrap { position: relative; }
+  .donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .donut-center-val { font-size: 18px; font-weight: 700; color: var(--text-bright); }
+  .donut-center-label { font-size: 10px; color: var(--text-muted); }
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; transition: opacity 0.2s; }
+  .legend-item:hover { opacity: 0.8; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .donut-tooltip {
+    position: absolute;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 50;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    display: none;
+    white-space: nowrap;
+    color: var(--text);
+  }
+
+  /* Customer Growth Mini Chart */
+  .growth-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .growth-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .growth-label strong { color: var(--green); }
 
   /* Table */
-  .table-card { background: #161922; border: 1px solid #1e2130; border-radius: 12px; padding: 20px; }
+  .table-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .table-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--primary); }
+  .search-input::placeholder { color: var(--text-muted); }
+  .filter-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .filter-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text-secondary); }
   table { width: 100%; border-collapse: collapse; }
   th {
     text-align: left;
     padding: 10px 12px;
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1px solid #1e2130;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: color 0.2s;
   }
+  th:hover { color: var(--text-secondary); }
+  th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.5; }
+  th.sorted .sort-arrow { opacity: 1; color: var(--primary-light); }
   td {
-    padding: 14px 12px;
+    padding: 12px 12px;
     font-size: 14px;
-    border-bottom: 1px solid #1e2130;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
   }
   tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(99,102,241,0.03); }
   .status {
     display: inline-block;
     padding: 4px 10px;
@@ -152,9 +428,9 @@
     font-size: 12px;
     font-weight: 500;
   }
-  .status.completed { background: rgba(34,197,94,0.1); color: #22c55e; }
-  .status.pending { background: rgba(234,179,8,0.1); color: #eab308; }
-  .status.cancelled { background: rgba(239,68,68,0.1); color: #ef4444; }
+  .status.completed { background: rgba(34,197,94,0.1); color: var(--green); }
+  .status.pending { background: rgba(234,179,8,0.1); color: var(--yellow); }
+  .status.cancelled { background: rgba(239,68,68,0.1); color: var(--red); }
   .avatar {
     width: 32px;
     height: 32px;
@@ -165,174 +441,1488 @@
     font-size: 13px;
     font-weight: 600;
     margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .td-customer { display: flex; align-items: center; }
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .page-btns { display: flex; gap: 4px; }
+  .page-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .page-btn:hover { border-color: var(--primary); color: var(--primary-light); }
+  .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Modals */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 480px;
+    padding: 28px;
+    animation: slideUp 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal h2 { font-size: 18px; margin-bottom: 20px; color: var(--text-bright); }
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    margin-top: -4px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+  .form-group select option { background: var(--bg-card); color: var(--text); }
+  .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+  .stat-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-detail-item { padding: 12px; background: var(--bg); border-radius: 8px; }
+  .stat-detail-item .sd-label { font-size: 12px; color: var(--text-muted); }
+  .stat-detail-item .sd-value { font-size: 18px; font-weight: 600; color: var(--text-bright); margin-top: 4px; }
+
+  /* Date Picker */
+  .date-picker-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+    z-index: 200;
+    display: none;
+    min-width: 260px;
+  }
+  .date-picker-dropdown.open { display: block; animation: dropIn 0.2s ease; }
+  .date-picker-dropdown label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+  .date-picker-dropdown input[type="date"] {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  /* Pages / Sections */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Section for pages that are simple placeholders */
+  .placeholder-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+  }
+  .placeholder-page .pp-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.3; }
+  .placeholder-page h2 { font-size: 22px; color: var(--text-bright); margin-bottom: 8px; }
+  .placeholder-page p { color: var(--text-muted); font-size: 14px; }
+
+  /* Theme toggle */
+  .theme-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--primary); color: var(--primary-light); }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    z-index: 600;
+    display: none;
+    animation: slideInRight 0.3s ease;
+    color: var(--text);
+  }
+  .toast.show { display: flex; align-items: center; gap: 10px; }
+  @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .toast-icon { font-size: 18px; }
+  .toast-success .toast-icon { color: var(--green); }
+
+  /* Analytics page */
+  .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .analytics-bar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin-top: 6px; margin-bottom: 10px; }
+  .analytics-bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+  .analytics-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 14px; }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .analytics-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: var(--sidebar-collapsed-w);
+      min-width: var(--sidebar-collapsed-w);
+      padding: 24px 8px;
+      z-index: 100;
+    }
+    .sidebar .nav-text, .sidebar .logo-text { display: none; }
+    .sidebar .logo { padding: 0 0 24px; justify-content: center; }
+    .sidebar .nav-item { justify-content: center; padding: 10px; }
+    .sidebar .sidebar-toggle { display: none; }
+    .main { margin-left: var(--sidebar-collapsed-w); padding: 16px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .header { flex-direction: column; align-items: flex-start; }
+    .header-right { width: 100%; flex-wrap: wrap; }
+    .search-input { width: 100%; }
+    .table-toolbar { flex-direction: column; align-items: stretch; }
+  }
+  @media (max-width: 480px) {
+    .stats { grid-template-columns: 1fr; }
+    .donut-container { flex-direction: column; }
+    .stat-detail-grid { grid-template-columns: 1fr; }
+  }
+
+  /* SVG path animation */
+  @keyframes drawLine {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+  }
+  .chart-line-animated {
+    stroke-dasharray: 1000;
+    animation: drawLine 1.2s ease forwards;
   }
 </style>
 </head>
 <body>
 <div class="layout">
-  <nav class="sidebar">
-    <div class="logo">Sales<span>Flow</span></div>
-    <div class="nav-item active"><span class="nav-icon">&#9632;</span> Dashboard</div>
-    <div class="nav-item"><span class="nav-icon">&#9830;</span> Analytics</div>
-    <div class="nav-item"><span class="nav-icon">&#9679;</span> Customers</div>
-    <div class="nav-item"><span class="nav-icon">&#9733;</span> Products</div>
-    <div class="nav-item"><span class="nav-icon">&#9881;</span> Orders</div>
-    <div class="nav-item"><span class="nav-icon">&#9993;</span> Messages</div>
-    <div class="nav-item"><span class="nav-icon">&#9881;</span> Settings</div>
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">&#9664;</button>
+    <div class="logo"><span>S</span><span class="logo-text">ales</span><span class="logo-text">Flow</span></div>
+    <div class="nav-item active" data-page="dashboard" tabindex="0" role="button"><span class="nav-icon">&#9632;</span><span class="nav-text">Dashboard</span></div>
+    <div class="nav-item" data-page="analytics" tabindex="0" role="button"><span class="nav-icon">&#9830;</span><span class="nav-text">Analytics</span></div>
+    <div class="nav-item" data-page="customers" tabindex="0" role="button"><span class="nav-icon">&#9679;</span><span class="nav-text">Customers</span></div>
+    <div class="nav-item" data-page="products" tabindex="0" role="button"><span class="nav-icon">&#9733;</span><span class="nav-text">Products</span></div>
+    <div class="nav-item" data-page="orders" tabindex="0" role="button"><span class="nav-icon">&#9881;</span><span class="nav-text">Orders</span></div>
+    <div class="nav-item" data-page="messages" tabindex="0" role="button"><span class="nav-icon">&#9993;</span><span class="nav-text">Messages</span></div>
+    <div class="nav-item" data-page="settings" tabindex="0" role="button"><span class="nav-icon">&#9881;</span><span class="nav-text">Settings</span></div>
   </nav>
 
   <main class="main">
-    <div class="header">
-      <h1>Dashboard</h1>
-      <div class="header-right">
-        <div class="date-badge">Mar 1 - Mar 11, 2026</div>
-        <button class="btn btn-ghost">Export</button>
-        <button class="btn btn-primary">+ New Order</button>
-      </div>
-    </div>
-
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-label">Total Revenue</div>
-        <div class="stat-value">$48,295</div>
-        <div class="stat-change up">+12.5% from last month</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Orders</div>
-        <div class="stat-value">1,247</div>
-        <div class="stat-change up">+8.2% from last month</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Customers</div>
-        <div class="stat-value">856</div>
-        <div class="stat-change up">+5.1% from last month</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Refund Rate</div>
-        <div class="stat-value">2.4%</div>
-        <div class="stat-change down">+0.3% from last month</div>
-      </div>
-    </div>
-
-    <div class="charts-row">
-      <div class="card">
-        <div class="card-title">Revenue Overview <span>Last 7 days</span></div>
-        <svg class="chart-area" viewBox="0 0 600 200">
-          <defs>
-            <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <!-- Grid lines -->
-          <line x1="0" y1="50" x2="600" y2="50" stroke="#1e2130" stroke-width="1"/>
-          <line x1="0" y1="100" x2="600" y2="100" stroke="#1e2130" stroke-width="1"/>
-          <line x1="0" y1="150" x2="600" y2="150" stroke="#1e2130" stroke-width="1"/>
-          <!-- Area -->
-          <path d="M0,160 C50,140 100,120 150,100 C200,80 250,90 300,60 C350,30 400,50 450,40 C500,30 550,20 600,35 L600,200 L0,200 Z" fill="url(#grad)"/>
-          <!-- Line -->
-          <path d="M0,160 C50,140 100,120 150,100 C200,80 250,90 300,60 C350,30 400,50 450,40 C500,30 550,20 600,35" fill="none" stroke="#6366f1" stroke-width="2.5"/>
-          <!-- Dots -->
-          <circle cx="0" cy="160" r="4" fill="#6366f1"/>
-          <circle cx="100" cy="120" r="4" fill="#6366f1"/>
-          <circle cx="200" cy="85" r="4" fill="#6366f1"/>
-          <circle cx="300" cy="60" r="4" fill="#6366f1"/>
-          <circle cx="400" cy="50" r="4" fill="#6366f1"/>
-          <circle cx="500" cy="28" r="4" fill="#6366f1"/>
-          <circle cx="600" cy="35" r="4" fill="#6366f1"/>
-          <!-- Labels -->
-          <text x="0" y="195" fill="#64748b" font-size="11">Mon</text>
-          <text x="95" y="195" fill="#64748b" font-size="11">Tue</text>
-          <text x="195" y="195" fill="#64748b" font-size="11">Wed</text>
-          <text x="295" y="195" fill="#64748b" font-size="11">Thu</text>
-          <text x="400" y="195" fill="#64748b" font-size="11">Fri</text>
-          <text x="498" y="195" fill="#64748b" font-size="11">Sat</text>
-          <text x="590" y="195" fill="#64748b" font-size="11">Sun</text>
-        </svg>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Traffic Source</div>
-        <div class="donut-container">
-          <svg width="140" height="140" viewBox="0 0 140 140">
-            <circle cx="70" cy="70" r="55" fill="none" stroke="#1e2130" stroke-width="20"/>
-            <circle cx="70" cy="70" r="55" fill="none" stroke="#6366f1" stroke-width="20"
-              stroke-dasharray="138 208" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
-            <circle cx="70" cy="70" r="55" fill="none" stroke="#06b6d4" stroke-width="20"
-              stroke-dasharray="86 260" stroke-dashoffset="-138" transform="rotate(-90 70 70)"/>
-            <circle cx="70" cy="70" r="55" fill="none" stroke="#22c55e" stroke-width="20"
-              stroke-dasharray="52 294" stroke-dashoffset="-224" transform="rotate(-90 70 70)"/>
-            <circle cx="70" cy="70" r="55" fill="none" stroke="#eab308" stroke-width="20"
-              stroke-dasharray="35 311" stroke-dashoffset="-276" transform="rotate(-90 70 70)"/>
-          </svg>
-          <div class="donut-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div> Direct (40%)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#06b6d4"></div> Organic (25%)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Referral (15%)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div> Social (10%)</div>
+    <!-- ====== DASHBOARD PAGE ====== -->
+    <div class="page active" id="page-dashboard">
+      <div class="header">
+        <div class="header-left">
+          <h1>Dashboard</h1>
+        </div>
+        <div class="header-right">
+          <div class="dropdown-wrapper" id="datePickerWrap">
+            <div class="date-badge" id="dateBadge">Mar 1 - Mar 11, 2026</div>
+            <div class="date-picker-dropdown" id="datePicker">
+              <label>Start Date</label>
+              <input type="date" id="dateStart" value="2026-03-01">
+              <label>End Date</label>
+              <input type="date" id="dateEnd" value="2026-03-11">
+              <button class="btn btn-primary btn-sm" style="width:100%;margin-top:4px;" id="dateApplyBtn">Apply</button>
+            </div>
           </div>
+          <button class="theme-toggle" id="themeToggle" title="Toggle theme">&#9790;</button>
+          <div class="dropdown-wrapper" id="notifWrap">
+            <button class="icon-btn" id="notifBtn">&#128276;<span class="badge" id="notifBadge">3</span></button>
+            <div class="dropdown" id="notifDropdown">
+              <div class="dropdown-header">Notifications</div>
+              <div class="dropdown-item"><span class="notif-dot"></span><div class="notif-text">New order #ORD-7835 received<div class="notif-time">2 min ago</div></div></div>
+              <div class="dropdown-item"><span class="notif-dot"></span><div class="notif-text">Payment of $299.00 confirmed<div class="notif-time">15 min ago</div></div></div>
+              <div class="dropdown-item"><span class="notif-dot"></span><div class="notif-text">Customer Sarah M. left a 5-star review<div class="notif-time">1 hour ago</div></div></div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item" style="justify-content:center;color:var(--primary-light);font-weight:500;">View all notifications</div>
+            </div>
+          </div>
+          <div class="dropdown-wrapper" id="userWrap">
+            <div class="user-avatar-header" id="userBtn">JD</div>
+            <div class="dropdown user-dropdown" id="userDropdown">
+              <div class="dropdown-header">John Doe<br><small>john@salesflow.io</small></div>
+              <div class="dropdown-item" id="userProfileBtn">&#128100; Profile</div>
+              <div class="dropdown-item" id="userSettingsBtn">&#9881; Settings</div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item" id="userLogoutBtn" style="color:var(--red)">&#10132; Logout</div>
+            </div>
+          </div>
+          <button class="btn btn-ghost" id="exportBtnDash">&#8681; Export</button>
+          <button class="btn btn-primary" id="newOrderBtnDash">+ New Order</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats" id="statsGrid">
+        <div class="stat-card" data-stat-idx="0">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value" data-target="48295" data-prefix="$" data-comma="true">$0</div>
+          <div class="stat-change up">&#9650; 12.5% from last month</div>
+        </div>
+        <div class="stat-card" data-stat-idx="1">
+          <div class="stat-label">Orders</div>
+          <div class="stat-value" data-target="1247" data-comma="true">0</div>
+          <div class="stat-change up">&#9650; 8.2% from last month</div>
+        </div>
+        <div class="stat-card" data-stat-idx="2">
+          <div class="stat-label">Customers</div>
+          <div class="stat-value" data-target="856" data-comma="true">0</div>
+          <div class="stat-change up">&#9650; 5.1% from last month</div>
+        </div>
+        <div class="stat-card" data-stat-idx="3">
+          <div class="stat-label">Refund Rate</div>
+          <div class="stat-value" data-target="2.4" data-suffix="%" data-decimals="1">0%</div>
+          <div class="stat-change down">&#9650; 0.3% from last month</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-title">
+            Revenue Overview
+            <div class="chart-toggles">
+              <button class="chart-toggle active" data-view="daily">Daily</button>
+              <button class="chart-toggle" data-view="weekly">Weekly</button>
+              <button class="chart-toggle" data-view="monthly">Monthly</button>
+            </div>
+          </div>
+          <div class="revenue-chart-wrap" id="revenueChartWrap">
+            <svg class="chart-area" id="revenueChart" viewBox="0 0 600 200"></svg>
+            <div class="chart-tooltip" id="chartTooltip">
+              <div class="tt-label"></div>
+              <div class="tt-value"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Traffic Source</div>
+          <div class="donut-container" style="position:relative;">
+            <div class="donut-wrap">
+              <svg width="140" height="140" viewBox="0 0 140 140" id="donutChart"></svg>
+              <div class="donut-center">
+                <div class="donut-center-val">12.4k</div>
+                <div class="donut-center-label">Visitors</div>
+              </div>
+            </div>
+            <div class="donut-legend" id="donutLegend"></div>
+            <div class="donut-tooltip" id="donutTooltip"></div>
+          </div>
+          <div class="growth-section">
+            <div class="growth-label">Customer Growth <strong>+18.2%</strong></div>
+            <svg width="100%" height="40" viewBox="0 0 300 40" id="growthChart" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Orders (mini) -->
+      <div class="table-card">
+        <div class="card-title">Recent Orders <span style="cursor:pointer;color:var(--primary-light);" id="viewAllOrders">View all &#8594;</span></div>
+        <table>
+          <thead><tr>
+            <th>Customer</th><th>Order ID</th><th>Product</th><th>Amount</th><th>Status</th><th>Date</th>
+          </tr></thead>
+          <tbody id="dashRecentOrders"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== ORDERS PAGE ====== -->
+    <div class="page" id="page-orders">
+      <div class="header">
+        <div class="header-left"><h1>Orders</h1></div>
+        <div class="header-right">
+          <button class="btn btn-ghost" id="exportBtnOrders">&#8681; Export CSV</button>
+          <button class="btn btn-primary" id="newOrderBtnOrders">+ New Order</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <input class="search-input" type="text" placeholder="Search by name or order ID..." id="orderSearch">
+          <div style="display:flex;gap:4px;flex-wrap:wrap;" id="filterBtnsWrap">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="cancelled">Cancelled</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr id="ordersTableHead">
+            <th data-sort="customer">Customer <span class="sort-arrow">&#9650;</span></th>
+            <th data-sort="id">Order ID <span class="sort-arrow">&#9650;</span></th>
+            <th data-sort="product">Product <span class="sort-arrow">&#9650;</span></th>
+            <th data-sort="amount">Amount <span class="sort-arrow">&#9650;</span></th>
+            <th data-sort="status">Status <span class="sort-arrow">&#9650;</span></th>
+            <th data-sort="date">Date <span class="sort-arrow">&#9650;</span></th>
+          </tr></thead>
+          <tbody id="ordersTableBody"></tbody>
+        </table>
+        <div class="pagination">
+          <span id="paginationInfo"></span>
+          <div class="page-btns" id="paginationBtns"></div>
         </div>
       </div>
     </div>
 
-    <div class="table-card">
-      <div class="card-title">Recent Orders <span>View all</span></div>
-      <table>
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Order ID</th>
-            <th>Product</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="avatar" style="background:rgba(99,102,241,0.15);color:#818cf8">JD</span>John Davis</td>
-            <td>#ORD-7821</td>
-            <td>Enterprise Plan</td>
-            <td>$299.00</td>
-            <td><span class="status completed">Completed</span></td>
-            <td>Mar 11, 2026</td>
-          </tr>
-          <tr>
-            <td><span class="avatar" style="background:rgba(6,182,212,0.15);color:#06b6d4">SM</span>Sarah Miller</td>
-            <td>#ORD-7820</td>
-            <td>Pro Plan</td>
-            <td>$149.00</td>
-            <td><span class="status completed">Completed</span></td>
-            <td>Mar 10, 2026</td>
-          </tr>
-          <tr>
-            <td><span class="avatar" style="background:rgba(34,197,94,0.15);color:#22c55e">AK</span>Alex Kim</td>
-            <td>#ORD-7819</td>
-            <td>Starter Plan</td>
-            <td>$49.00</td>
-            <td><span class="status pending">Pending</span></td>
-            <td>Mar 10, 2026</td>
-          </tr>
-          <tr>
-            <td><span class="avatar" style="background:rgba(234,179,8,0.15);color:#eab308">LW</span>Lisa Wang</td>
-            <td>#ORD-7818</td>
-            <td>Enterprise Plan</td>
-            <td>$299.00</td>
-            <td><span class="status completed">Completed</span></td>
-            <td>Mar 9, 2026</td>
-          </tr>
-          <tr>
-            <td><span class="avatar" style="background:rgba(239,68,68,0.15);color:#ef4444">RM</span>Ryan Moore</td>
-            <td>#ORD-7817</td>
-            <td>Pro Plan</td>
-            <td>$149.00</td>
-            <td><span class="status cancelled">Cancelled</span></td>
-            <td>Mar 9, 2026</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- ====== ANALYTICS PAGE ====== -->
+    <div class="page" id="page-analytics">
+      <div class="header"><div class="header-left"><h1>Analytics</h1></div></div>
+      <div class="analytics-grid">
+        <div class="card">
+          <div class="card-title">Revenue by Product</div>
+          <div id="analyticsProducts"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Conversion Funnel</div>
+          <div id="analyticsFunnel"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Top Regions</div>
+          <div id="analyticsRegions"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Monthly Trends</div>
+          <svg width="100%" height="160" viewBox="0 0 500 160" id="analyticsTrend" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== CUSTOMERS PAGE ====== -->
+    <div class="page" id="page-customers">
+      <div class="header"><div class="header-left"><h1>Customers</h1></div></div>
+      <div class="stats" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card" style="cursor:default;"><div class="stat-label">Total Customers</div><div class="stat-value" style="color:var(--text-bright)">856</div><div class="stat-change up">&#9650; 5.1% this month</div></div>
+        <div class="stat-card" style="cursor:default;"><div class="stat-label">New This Month</div><div class="stat-value" style="color:var(--text-bright)">124</div><div class="stat-change up">&#9650; 12.3% vs last month</div></div>
+        <div class="stat-card" style="cursor:default;"><div class="stat-label">Avg. Order Value</div><div class="stat-value" style="color:var(--text-bright)">$182</div><div class="stat-change up">&#9650; 3.7% vs last month</div></div>
+      </div>
+      <div class="table-card">
+        <div class="card-title">Customer List</div>
+        <table>
+          <thead><tr><th>Customer</th><th>Email</th><th>Orders</th><th>Total Spent</th><th>Status</th></tr></thead>
+          <tbody id="customersTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== PLACEHOLDER PAGES ====== -->
+    <div class="page" id="page-products">
+      <div class="placeholder-page"><div class="pp-icon">&#9733;</div><h2>Products</h2><p>Product catalog and inventory management coming soon.</p></div>
+    </div>
+    <div class="page" id="page-messages">
+      <div class="placeholder-page"><div class="pp-icon">&#9993;</div><h2>Messages</h2><p>Customer messaging center coming soon.</p></div>
+    </div>
+    <div class="page" id="page-settings">
+      <div class="header"><div class="header-left"><h1>Settings</h1></div></div>
+      <div class="card" style="max-width:600px;">
+        <div class="card-title">Preferences</div>
+        <div class="form-group"><label>Display Name</label><input type="text" value="John Doe"></div>
+        <div class="form-group"><label>Email</label><input type="email" value="john@salesflow.io"></div>
+        <div class="form-group"><label>Theme</label>
+          <select id="themeSelect"><option value="dark">Dark</option><option value="light">Light</option></select>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" id="saveSettingsBtn">Save Changes</button></div>
+      </div>
     </div>
   </main>
 </div>
+
+<!-- New Order Modal -->
+<div class="modal-overlay" id="newOrderModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="newOrderCloseBtn">&times;</button>
+    <h2>New Order</h2>
+    <div class="form-group"><label>Customer Name</label><input type="text" id="newOrderName" placeholder="e.g. Jane Smith"></div>
+    <div class="form-group"><label>Product</label>
+      <select id="newOrderProduct">
+        <option value="Starter Plan">Starter Plan - $49.00</option>
+        <option value="Pro Plan">Pro Plan - $149.00</option>
+        <option value="Enterprise Plan">Enterprise Plan - $299.00</option>
+        <option value="Custom Solution">Custom Solution - $499.00</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Amount ($)</label><input type="number" id="newOrderAmount" placeholder="0.00" step="0.01"></div>
+    <div class="form-group"><label>Status</label>
+      <select id="newOrderStatus">
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" id="newOrderCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="newOrderSubmitBtn">Create Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stat Detail Modal -->
+<div class="modal-overlay" id="statModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <button class="modal-close" id="statModalCloseBtn">&times;</button>
+    <h2 id="statModalTitle">Details</h2>
+    <div id="statModalBody"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast toast-success" id="toast"><span class="toast-icon">&#10003;</span><span id="toastMsg"></span></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ========== DATA ==========
+  var productPrices = { 'Starter Plan': 49, 'Pro Plan': 149, 'Enterprise Plan': 299, 'Custom Solution': 499 };
+  var avatarColors = [
+    { bg: 'rgba(99,102,241,0.15)', color: '#818cf8' },
+    { bg: 'rgba(6,182,212,0.15)', color: '#06b6d4' },
+    { bg: 'rgba(34,197,94,0.15)', color: '#22c55e' },
+    { bg: 'rgba(234,179,8,0.15)', color: '#eab308' },
+    { bg: 'rgba(239,68,68,0.15)', color: '#ef4444' },
+    { bg: 'rgba(168,85,247,0.15)', color: '#a855f7' }
+  ];
+
+  var orders = [
+    { customer:'John Davis', id:'ORD-7835', product:'Enterprise Plan', amount:299, status:'completed', date:'2026-03-11' },
+    { customer:'Sarah Miller', id:'ORD-7834', product:'Pro Plan', amount:149, status:'completed', date:'2026-03-11' },
+    { customer:'Alex Kim', id:'ORD-7833', product:'Starter Plan', amount:49, status:'pending', date:'2026-03-10' },
+    { customer:'Lisa Wang', id:'ORD-7832', product:'Enterprise Plan', amount:299, status:'completed', date:'2026-03-10' },
+    { customer:'Ryan Moore', id:'ORD-7831', product:'Pro Plan', amount:149, status:'cancelled', date:'2026-03-09' },
+    { customer:'Emma Thompson', id:'ORD-7830', product:'Custom Solution', amount:499, status:'completed', date:'2026-03-09' },
+    { customer:'David Chen', id:'ORD-7829', product:'Starter Plan', amount:49, status:'pending', date:'2026-03-08' },
+    { customer:'Olivia Brown', id:'ORD-7828', product:'Pro Plan', amount:149, status:'completed', date:'2026-03-08' },
+    { customer:'James Wilson', id:'ORD-7827', product:'Enterprise Plan', amount:299, status:'completed', date:'2026-03-07' },
+    { customer:'Sophia Garcia', id:'ORD-7826', product:'Starter Plan', amount:49, status:'cancelled', date:'2026-03-07' },
+    { customer:'Michael Lee', id:'ORD-7825', product:'Pro Plan', amount:149, status:'pending', date:'2026-03-06' },
+    { customer:'Ava Martinez', id:'ORD-7824', product:'Custom Solution', amount:499, status:'completed', date:'2026-03-06' },
+    { customer:'William Taylor', id:'ORD-7823', product:'Enterprise Plan', amount:299, status:'completed', date:'2026-03-05' },
+    { customer:'Isabella Anderson', id:'ORD-7822', product:'Starter Plan', amount:49, status:'pending', date:'2026-03-05' },
+    { customer:'Daniel Thomas', id:'ORD-7821', product:'Pro Plan', amount:149, status:'completed', date:'2026-03-04' },
+    { customer:'Mia Jackson', id:'ORD-7820', product:'Enterprise Plan', amount:299, status:'cancelled', date:'2026-03-04' },
+    { customer:'Ethan White', id:'ORD-7819', product:'Starter Plan', amount:49, status:'completed', date:'2026-03-03' },
+    { customer:'Charlotte Harris', id:'ORD-7818', product:'Custom Solution', amount:499, status:'completed', date:'2026-03-03' },
+    { customer:'Benjamin Clark', id:'ORD-7817', product:'Pro Plan', amount:149, status:'pending', date:'2026-03-02' },
+    { customer:'Amelia Lewis', id:'ORD-7816', product:'Enterprise Plan', amount:299, status:'completed', date:'2026-03-02' },
+    { customer:'Lucas Walker', id:'ORD-7815', product:'Starter Plan', amount:49, status:'completed', date:'2026-03-01' },
+    { customer:'Harper Hall', id:'ORD-7814', product:'Pro Plan', amount:149, status:'cancelled', date:'2026-03-01' },
+    { customer:'Mason Allen', id:'ORD-7813', product:'Custom Solution', amount:499, status:'pending', date:'2026-02-28' },
+    { customer:'Evelyn Young', id:'ORD-7812', product:'Enterprise Plan', amount:299, status:'completed', date:'2026-02-28' },
+    { customer:'Logan King', id:'ORD-7811', product:'Starter Plan', amount:49, status:'completed', date:'2026-02-27' }
+  ];
+
+  var chartData = {
+    daily: { labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], values:[4200,5800,4900,7200,6100,8400,7800] },
+    weekly: { labels:['W1','W2','W3','W4'], values:[18200,22400,19800,26500] },
+    monthly: { labels:['Oct','Nov','Dec','Jan','Feb','Mar'], values:[32100,38400,35200,41800,44600,48295] }
+  };
+
+  var trafficSources = [
+    { name:'Direct', pct:40, color:'#6366f1' },
+    { name:'Organic', pct:25, color:'#06b6d4' },
+    { name:'Referral', pct:15, color:'#22c55e' },
+    { name:'Social', pct:10, color:'#eab308' },
+    { name:'Email', pct:10, color:'#a855f7' }
+  ];
+
+  var statDetails = [
+    { title:'Revenue Details', items:[
+      { label:'This Month', value:'$48,295' }, { label:'Last Month', value:'$42,930' },
+      { label:'Best Day', value:'$8,400 (Sat)' }, { label:'Avg Daily', value:'$6,899' },
+      { label:'YTD Total', value:'$134,825' }, { label:'Projected', value:'$58,200' }
+    ]},
+    { title:'Order Details', items:[
+      { label:'This Month', value:'1,247' }, { label:'Completed', value:'1,089' },
+      { label:'Pending', value:'112' }, { label:'Cancelled', value:'46' },
+      { label:'Avg Order Value', value:'$182' }, { label:'Repeat Orders', value:'34%' }
+    ]},
+    { title:'Customer Details', items:[
+      { label:'Total Active', value:'856' }, { label:'New This Month', value:'124' },
+      { label:'Returning', value:'732' }, { label:'Churn Rate', value:'2.1%' },
+      { label:'Avg Lifetime', value:'8.4 months' }, { label:'NPS Score', value:'72' }
+    ]},
+    { title:'Refund Details', items:[
+      { label:'Refund Rate', value:'2.4%' }, { label:'Total Refunds', value:'30' },
+      { label:'Refund Amount', value:'$4,170' }, { label:'Avg Refund', value:'$139' },
+      { label:'Top Reason', value:'Wrong product' }, { label:'Resolution Time', value:'1.8 days' }
+    ]}
+  ];
+
+  var customersList = [
+    { name:'John Davis', email:'john.davis@email.com', orders:12, spent:2847, status:'active' },
+    { name:'Sarah Miller', email:'sarah.m@email.com', orders:8, spent:1892, status:'active' },
+    { name:'Alex Kim', email:'alex.kim@email.com', orders:3, spent:447, status:'active' },
+    { name:'Lisa Wang', email:'lisa.w@email.com', orders:15, spent:3295, status:'active' },
+    { name:'Ryan Moore', email:'ryan.moore@email.com', orders:1, spent:149, status:'inactive' },
+    { name:'Emma Thompson', email:'emma.t@email.com', orders:7, spent:2093, status:'active' },
+    { name:'David Chen', email:'d.chen@email.com', orders:4, spent:596, status:'active' },
+    { name:'Olivia Brown', email:'o.brown@email.com', orders:9, spent:1641, status:'active' }
+  ];
+
+  // ========== STATE ==========
+  var currentPage = 'dashboard';
+  var currentFilter = 'all';
+  var currentSort = { key: 'date', dir: 'desc' };
+  var currentTablePage = 1;
+  var perPage = 5;
+  var currentChartView = 'daily';
+  var orderIdCounter = 7836;
+
+  // ========== HELPERS ==========
+  function $(id) { return document.getElementById(id); }
+  function esc(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  var statusWhitelist = ['completed', 'pending', 'cancelled'];
+  function sanitizeStatus(s) {
+    return statusWhitelist.indexOf(s) !== -1 ? s : 'pending';
+  }
+
+  function getInitials(name) {
+    return name.split(' ').filter(function(w) { return w.length > 0; }).map(function(w) { return w[0]; }).join('').toUpperCase().slice(0, 2);
+  }
+  function getAvatarColor(name) {
+    var hash = 0;
+    for (var i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
+    return avatarColors[Math.abs(hash) % avatarColors.length];
+  }
+  function formatDate(d) {
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  // ========== NAVIGATION ==========
+  function navigateTo(page) {
+    currentPage = page;
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    $('page-' + page).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    document.querySelector('.nav-item[data-page="' + page + '"]').classList.add('active');
+    if (page === 'dashboard') { animateStats(); drawRevenueChart(); drawDonut(); drawGrowthChart(); renderDashRecentOrders(); }
+    if (page === 'orders') { currentTablePage = 1; renderOrders(); }
+    if (page === 'analytics') renderAnalytics();
+    if (page === 'customers') renderCustomers();
+  }
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    item.addEventListener('click', function() { navigateTo(item.dataset.page); });
+    item.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navigateTo(item.dataset.page);
+      }
+    });
+  });
+  $('viewAllOrders').addEventListener('click', function() { navigateTo('orders'); });
+
+  // Sidebar toggle
+  $('sidebarToggle').addEventListener('click', function() {
+    $('sidebar').classList.toggle('collapsed');
+  });
+
+  // ========== THEME ==========
+  function setTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    $('themeToggle').textContent = theme === 'dark' ? '\u263E' : '\u2600';
+    var sel = $('themeSelect');
+    if (sel) sel.value = theme;
+  }
+  $('themeToggle').addEventListener('click', function() {
+    setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+  $('themeSelect').addEventListener('change', function() { setTheme(this.value); });
+
+  // ========== DROPDOWNS ==========
+  function setupDropdown(btnId, dropdownId) {
+    var btn = $(btnId);
+    var dd = $(dropdownId);
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.querySelectorAll('.dropdown.open, .date-picker-dropdown.open').forEach(function(d) { if (d !== dd) d.classList.remove('open'); });
+      dd.classList.toggle('open');
+    });
+  }
+  setupDropdown('notifBtn', 'notifDropdown');
+  setupDropdown('userBtn', 'userDropdown');
+  $('dateBadge').addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.querySelectorAll('.dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+    $('datePicker').classList.toggle('open');
+  });
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.dropdown.open, .date-picker-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+  });
+  document.querySelectorAll('.dropdown, .date-picker-dropdown').forEach(function(d) {
+    d.addEventListener('click', function(e) { e.stopPropagation(); });
+  });
+
+  // Mark notifications as read
+  $('notifBtn').addEventListener('click', function() {
+    setTimeout(function() { $('notifBadge').style.display = 'none'; }, 300);
+  });
+
+  // User dropdown actions
+  $('userProfileBtn').addEventListener('click', function() { showToast('Profile page coming soon'); });
+  $('userSettingsBtn').addEventListener('click', function() { navigateTo('settings'); });
+  $('userLogoutBtn').addEventListener('click', function() { showToast('Logged out successfully'); });
+  $('saveSettingsBtn').addEventListener('click', function() { showToast('Settings saved!'); });
+
+  // ========== DATE RANGE ==========
+  function applyDateRange() {
+    var s = $('dateStart').value;
+    var e = $('dateEnd').value;
+    if (!s || !e) return;
+    var fmt = function(d) {
+      var dt = new Date(d + 'T00:00:00');
+      return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    };
+    $('dateBadge').textContent = fmt(s) + ' - ' + fmt(e);
+    $('datePicker').classList.remove('open');
+    showToast('Date range updated');
+  }
+  $('dateApplyBtn').addEventListener('click', applyDateRange);
+
+  // ========== STAT CARDS ANIMATION ==========
+  var statsAnimated = false;
+  function animateStats() {
+    if (statsAnimated) return;
+    statsAnimated = true;
+    document.querySelectorAll('.stat-value[data-target]').forEach(function(el) {
+      var target = parseFloat(el.dataset.target);
+      var prefix = el.dataset.prefix || '';
+      var suffix = el.dataset.suffix || '';
+      var decimals = parseInt(el.dataset.decimals) || 0;
+      var useComma = el.dataset.comma === 'true';
+      var duration = 1200;
+      var start = performance.now();
+      function tick(now) {
+        var elapsed = now - start;
+        var progress = Math.min(elapsed / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var val = target * eased;
+        var display;
+        if (decimals > 0) {
+          display = val.toFixed(decimals);
+        } else {
+          display = Math.round(val).toString();
+          if (useComma) display = Number(Math.round(val)).toLocaleString();
+        }
+        el.textContent = prefix + display + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  // Stat card click handlers
+  document.querySelectorAll('.stat-card[data-stat-idx]').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var idx = parseInt(card.dataset.statIdx);
+      openStatModal(idx);
+    });
+  });
+
+  function openStatModal(idx) {
+    var data = statDetails[idx];
+    $('statModalTitle').textContent = data.title;
+    var body = $('statModalBody');
+    // Build DOM safely
+    body.textContent = '';
+    var grid = document.createElement('div');
+    grid.className = 'stat-detail-grid';
+    data.items.forEach(function(it) {
+      var item = document.createElement('div');
+      item.className = 'stat-detail-item';
+      var lbl = document.createElement('div');
+      lbl.className = 'sd-label';
+      lbl.textContent = it.label;
+      var val = document.createElement('div');
+      val.className = 'sd-value';
+      val.textContent = it.value;
+      item.appendChild(lbl);
+      item.appendChild(val);
+      grid.appendChild(item);
+    });
+    body.appendChild(grid);
+    $('statModal').classList.add('open');
+    focusModal('statModal');
+  }
+
+  // ========== REVENUE CHART ==========
+  function drawRevenueChart(view) {
+    if (view) currentChartView = view;
+    var data = chartData[currentChartView];
+    var svg = $('revenueChart');
+    var W = 600, H = 180, padTop = 10, padBot = 30;
+    var chartH = H - padTop - padBot;
+    var maxVal = Math.max.apply(null, data.values) * 1.1;
+    var points = data.values.map(function(v, i) {
+      var x = data.values.length === 1 ? W / 2 : (i / (data.values.length - 1)) * W;
+      var y = padTop + chartH - (v / maxVal) * chartH;
+      return { x: x, y: y, val: v, label: data.labels[i] };
+    });
+
+    var pathD = '';
+    var areaD = '';
+    points.forEach(function(p, i) {
+      if (i === 0) { pathD += 'M' + p.x + ',' + p.y; areaD += 'M' + p.x + ',' + p.y; }
+      else {
+        var prev = points[i-1];
+        var cpx1 = prev.x + (p.x - prev.x) * 0.4;
+        var cpx2 = prev.x + (p.x - prev.x) * 0.6;
+        pathD += ' C' + cpx1 + ',' + prev.y + ' ' + cpx2 + ',' + p.y + ' ' + p.x + ',' + p.y;
+        areaD += ' C' + cpx1 + ',' + prev.y + ' ' + cpx2 + ',' + p.y + ' ' + p.x + ',' + p.y;
+      }
+    });
+    areaD += ' L' + W + ',' + (H - padBot) + ' L0,' + (H - padBot) + ' Z';
+
+    // Build SVG with DOM methods
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var ns = 'http://www.w3.org/2000/svg';
+
+    // Gradient
+    var defs = document.createElementNS(ns, 'defs');
+    var grad = document.createElementNS(ns, 'linearGradient');
+    grad.setAttribute('id', 'revenueGrad');
+    grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+    grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+    var stop1 = document.createElementNS(ns, 'stop');
+    stop1.setAttribute('offset', '0%'); stop1.setAttribute('stop-color', '#6366f1'); stop1.setAttribute('stop-opacity', '0.3');
+    var stop2 = document.createElementNS(ns, 'stop');
+    stop2.setAttribute('offset', '100%'); stop2.setAttribute('stop-color', '#6366f1'); stop2.setAttribute('stop-opacity', '0');
+    grad.appendChild(stop1); grad.appendChild(stop2);
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    // Grid lines
+    for (var g = 0; g < 4; g++) {
+      var gy = padTop + (chartH / 3) * g;
+      var gline = document.createElementNS(ns, 'line');
+      gline.setAttribute('x1', '0'); gline.setAttribute('y1', gy);
+      gline.setAttribute('x2', W); gline.setAttribute('y2', gy);
+      gline.setAttribute('stroke', '#1e2130'); gline.setAttribute('stroke-width', '1');
+      svg.appendChild(gline);
+    }
+
+    // Area
+    var areaPath = document.createElementNS(ns, 'path');
+    areaPath.setAttribute('d', areaD);
+    areaPath.setAttribute('fill', 'url(#revenueGrad)');
+    areaPath.setAttribute('opacity', '0');
+    var anim = document.createElementNS(ns, 'animate');
+    anim.setAttribute('attributeName', 'opacity');
+    anim.setAttribute('from', '0'); anim.setAttribute('to', '1');
+    anim.setAttribute('dur', '0.6s'); anim.setAttribute('fill', 'freeze');
+    areaPath.appendChild(anim);
+    svg.appendChild(areaPath);
+
+    // Line
+    var linePath = document.createElementNS(ns, 'path');
+    linePath.setAttribute('d', pathD);
+    linePath.setAttribute('fill', 'none');
+    linePath.setAttribute('stroke', '#6366f1');
+    linePath.setAttribute('stroke-width', '2.5');
+    linePath.setAttribute('class', 'chart-line-animated');
+    svg.appendChild(linePath);
+
+    // Dots and labels
+    points.forEach(function(p, i) {
+      var circle = document.createElementNS(ns, 'circle');
+      circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y);
+      circle.setAttribute('r', '5'); circle.setAttribute('fill', '#6366f1');
+      circle.setAttribute('stroke', '#161922'); circle.setAttribute('stroke-width', '2');
+      circle.setAttribute('data-idx', i);
+      circle.style.cursor = 'pointer';
+      svg.appendChild(circle);
+
+      var text = document.createElementNS(ns, 'text');
+      text.setAttribute('x', p.x); text.setAttribute('y', H - 5);
+      text.setAttribute('fill', '#64748b'); text.setAttribute('font-size', '11');
+      text.setAttribute('text-anchor', 'middle');
+      text.textContent = p.label;
+      svg.appendChild(text);
+    });
+
+    // Tooltip logic
+    var tooltip = $('chartTooltip');
+    var wrap = $('revenueChartWrap');
+    svg.querySelectorAll('circle[data-idx]').forEach(function(dot) {
+      dot.addEventListener('mouseenter', function(e) {
+        var idx = parseInt(dot.getAttribute('data-idx'));
+        var p = points[idx];
+        tooltip.querySelector('.tt-label').textContent = p.label;
+        tooltip.querySelector('.tt-value').textContent = '$' + p.val.toLocaleString();
+        tooltip.style.display = 'block';
+        var rect = svg.getBoundingClientRect();
+        var wrapRect = wrap.getBoundingClientRect();
+        var dotX = (p.x / W) * rect.width;
+        var dotY = (p.y / H) * rect.height;
+        tooltip.style.left = (rect.left - wrapRect.left + dotX + 10) + 'px';
+        tooltip.style.top = (rect.top - wrapRect.top + dotY - 40) + 'px';
+      });
+      dot.addEventListener('mouseleave', function() { tooltip.style.display = 'none'; });
+    });
+
+    // Update toggle buttons
+    document.querySelectorAll('.chart-toggle').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.view === currentChartView);
+    });
+  }
+  document.querySelectorAll('.chart-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function() { drawRevenueChart(btn.dataset.view); });
+  });
+
+  // ========== DONUT CHART ==========
+  function drawDonut() {
+    var svg = $('donutChart');
+    var legend = $('donutLegend');
+    var tooltip = $('donutTooltip');
+    var R = 55, CX = 70, CY = 70, SW = 20;
+    var C = 2 * Math.PI * R;
+    var offset = 0;
+    var ns = 'http://www.w3.org/2000/svg';
+
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    legend.textContent = '';
+
+    trafficSources.forEach(function(src, i) {
+      var dashLen = (src.pct / 100) * C;
+      var circle = document.createElementNS(ns, 'circle');
+      circle.setAttribute('cx', CX); circle.setAttribute('cy', CY);
+      circle.setAttribute('r', R); circle.setAttribute('fill', 'none');
+      circle.setAttribute('stroke', src.color); circle.setAttribute('stroke-width', SW);
+      circle.setAttribute('stroke-dasharray', dashLen + ' ' + (C - dashLen));
+      circle.setAttribute('stroke-dashoffset', -offset);
+      circle.setAttribute('transform', 'rotate(-90 ' + CX + ' ' + CY + ')');
+      circle.setAttribute('data-idx', i);
+      circle.style.cursor = 'pointer';
+      circle.style.transition = 'stroke-width 0.2s';
+      svg.appendChild(circle);
+      offset += dashLen;
+
+      var legItem = document.createElement('div');
+      legItem.className = 'legend-item';
+      var dot = document.createElement('div');
+      dot.className = 'legend-dot';
+      dot.style.background = src.color;
+      legItem.appendChild(dot);
+      legItem.appendChild(document.createTextNode(src.name + ' (' + src.pct + '%)'));
+      legend.appendChild(legItem);
+    });
+
+    // Tooltip
+    var container = svg.closest('.donut-container');
+    svg.querySelectorAll('circle[data-idx]').forEach(function(seg) {
+      seg.addEventListener('mouseenter', function(e) {
+        var idx = parseInt(seg.getAttribute('data-idx'));
+        var src = trafficSources[idx];
+        seg.setAttribute('stroke-width', SW + 4);
+        tooltip.textContent = '';
+        var b = document.createElement('strong');
+        b.style.color = src.color;
+        b.textContent = src.name;
+        tooltip.appendChild(b);
+        tooltip.appendChild(document.createElement('br'));
+        tooltip.appendChild(document.createTextNode(src.pct + '% of traffic'));
+        tooltip.style.display = 'block';
+        var rect = container.getBoundingClientRect();
+        tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+        tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
+      });
+      seg.addEventListener('mousemove', function(e) {
+        var rect = container.getBoundingClientRect();
+        tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+        tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
+      });
+      seg.addEventListener('mouseleave', function() {
+        seg.setAttribute('stroke-width', SW);
+        tooltip.style.display = 'none';
+      });
+    });
+  }
+
+  // ========== GROWTH MINI CHART ==========
+  function drawGrowthChart() {
+    var svg = $('growthChart');
+    var vals = [420,480,510,490,540,580,620,670,710,690,740,800];
+    var W = 300, H = 40;
+    var max = Math.max.apply(null, vals) * 1.1;
+    var ns = 'http://www.w3.org/2000/svg';
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    var pts = vals.map(function(v, i) {
+      return { x: (i / (vals.length - 1)) * W, y: H - (v / max) * H };
+    });
+    var d = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p.x + ',' + p.y; }).join(' ');
+
+    var defs = document.createElementNS(ns, 'defs');
+    var grad = document.createElementNS(ns, 'linearGradient');
+    grad.setAttribute('id', 'growthGrad');
+    grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+    grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+    var s1 = document.createElementNS(ns, 'stop');
+    s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', '#22c55e'); s1.setAttribute('stop-opacity', '0.2');
+    var s2 = document.createElementNS(ns, 'stop');
+    s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', '#22c55e'); s2.setAttribute('stop-opacity', '0');
+    grad.appendChild(s1); grad.appendChild(s2);
+    defs.appendChild(grad);
+    svg.appendChild(defs);
+
+    var area = document.createElementNS(ns, 'path');
+    area.setAttribute('d', d + ' L' + W + ',' + H + ' L0,' + H + ' Z');
+    area.setAttribute('fill', 'url(#growthGrad)');
+    svg.appendChild(area);
+
+    var line = document.createElementNS(ns, 'path');
+    line.setAttribute('d', d);
+    line.setAttribute('fill', 'none');
+    line.setAttribute('stroke', '#22c55e');
+    line.setAttribute('stroke-width', '2');
+    svg.appendChild(line);
+  }
+
+  // ========== DASHBOARD RECENT ORDERS ==========
+  function renderDashRecentOrders() {
+    var tbody = $('dashRecentOrders');
+    tbody.textContent = '';
+    orders.slice(0, 5).forEach(function(o) {
+      tbody.appendChild(createOrderRow(o));
+    });
+  }
+
+  // ========== ORDER ROW BUILDER (DOM) ==========
+  function createOrderRow(o) {
+    var ac = getAvatarColor(o.customer);
+    var tr = document.createElement('tr');
+
+    var tdCust = document.createElement('td');
+    var custDiv = document.createElement('div');
+    custDiv.className = 'td-customer';
+    var av = document.createElement('span');
+    av.className = 'avatar';
+    av.style.background = ac.bg;
+    av.style.color = ac.color;
+    av.textContent = getInitials(o.customer);
+    custDiv.appendChild(av);
+    custDiv.appendChild(document.createTextNode(o.customer));
+    tdCust.appendChild(custDiv);
+    tr.appendChild(tdCust);
+
+    var tdId = document.createElement('td');
+    tdId.textContent = '#' + o.id;
+    tr.appendChild(tdId);
+
+    var tdProd = document.createElement('td');
+    tdProd.textContent = o.product;
+    tr.appendChild(tdProd);
+
+    var tdAmt = document.createElement('td');
+    tdAmt.textContent = '$' + o.amount.toFixed(2);
+    tr.appendChild(tdAmt);
+
+    var tdStatus = document.createElement('td');
+    var statusSpan = document.createElement('span');
+    statusSpan.className = 'status ' + sanitizeStatus(o.status);
+    statusSpan.textContent = o.status.charAt(0).toUpperCase() + o.status.slice(1);
+    tdStatus.appendChild(statusSpan);
+    tr.appendChild(tdStatus);
+
+    var tdDate = document.createElement('td');
+    tdDate.textContent = formatDate(o.date);
+    tr.appendChild(tdDate);
+
+    return tr;
+  }
+
+  // ========== ORDERS TABLE ==========
+  function getFilteredOrders() {
+    var list = orders.slice();
+    var searchEl = $('orderSearch');
+    var q = searchEl ? searchEl.value.toLowerCase() : '';
+    if (q) {
+      list = list.filter(function(o) {
+        return o.customer.toLowerCase().indexOf(q) !== -1 || o.id.toLowerCase().indexOf(q) !== -1;
+      });
+    }
+    if (currentFilter !== 'all') {
+      list = list.filter(function(o) { return o.status === currentFilter; });
+    }
+
+    list.sort(function(a, b) {
+      var va, vb;
+      switch (currentSort.key) {
+        case 'customer': va = a.customer.toLowerCase(); vb = b.customer.toLowerCase(); break;
+        case 'id': va = parseInt(a.id.replace('ORD-','')); vb = parseInt(b.id.replace('ORD-','')); break;
+        case 'product': va = a.product; vb = b.product; break;
+        case 'amount': va = a.amount; vb = b.amount; break;
+        case 'status': va = a.status; vb = b.status; break;
+        case 'date': va = a.date; vb = b.date; break;
+        default: va = a.date; vb = b.date;
+      }
+      if (va < vb) return currentSort.dir === 'asc' ? -1 : 1;
+      if (va > vb) return currentSort.dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return list;
+  }
+
+  function renderOrders() {
+    var filtered = getFilteredOrders();
+    var totalPages = filtered.length === 0 ? 0 : Math.ceil(filtered.length / perPage);
+    if (currentTablePage > totalPages) currentTablePage = totalPages;
+    var start = (currentTablePage - 1) * perPage;
+    var pageItems = filtered.slice(start, start + perPage);
+
+    var tbody = $('ordersTableBody');
+    tbody.textContent = '';
+    if (pageItems.length === 0) {
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      td.setAttribute('colspan', '6');
+      td.style.textAlign = 'center';
+      td.style.padding = '40px';
+      td.style.color = 'var(--text-muted)';
+      td.textContent = 'No orders found';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    } else {
+      pageItems.forEach(function(o) {
+        tbody.appendChild(createOrderRow(o));
+      });
+    }
+
+    if (filtered.length === 0) {
+      $('paginationInfo').textContent = 'No orders found';
+    } else {
+      $('paginationInfo').textContent = 'Showing ' + (start + 1) + '-' + Math.min(start + perPage, filtered.length) + ' of ' + filtered.length;
+    }
+
+    var btnsDiv = $('paginationBtns');
+    btnsDiv.textContent = '';
+
+    if (totalPages > 0) {
+      var prevBtn = document.createElement('button');
+      prevBtn.className = 'page-btn';
+      prevBtn.textContent = '\u2039';
+      prevBtn.disabled = currentTablePage <= 1;
+      prevBtn.addEventListener('click', function() { goToPage(currentTablePage - 1); });
+      btnsDiv.appendChild(prevBtn);
+
+      for (var i = 1; i <= totalPages; i++) {
+        (function(pg) {
+          var pgBtn = document.createElement('button');
+          pgBtn.className = 'page-btn' + (pg === currentTablePage ? ' active' : '');
+          pgBtn.textContent = pg;
+          pgBtn.addEventListener('click', function() { goToPage(pg); });
+          btnsDiv.appendChild(pgBtn);
+        })(i);
+      }
+
+      var nextBtn = document.createElement('button');
+      nextBtn.className = 'page-btn';
+      nextBtn.textContent = '\u203A';
+      nextBtn.disabled = currentTablePage >= totalPages;
+      nextBtn.addEventListener('click', function() { goToPage(currentTablePage + 1); });
+      btnsDiv.appendChild(nextBtn);
+    }
+
+    // Update sort arrows
+    document.querySelectorAll('#ordersTableHead th[data-sort]').forEach(function(th) {
+      th.classList.toggle('sorted', th.dataset.sort === currentSort.key);
+      var arrow = th.querySelector('.sort-arrow');
+      if (th.dataset.sort === currentSort.key) {
+        arrow.textContent = currentSort.dir === 'asc' ? '\u25B2' : '\u25BC';
+      } else {
+        arrow.textContent = '\u25B2';
+      }
+    });
+  }
+
+  function goToPage(p) { currentTablePage = p; renderOrders(); }
+
+  $('orderSearch').addEventListener('input', function() {
+    currentTablePage = 1;
+    renderOrders();
+  });
+
+  // Filter buttons
+  $('filterBtnsWrap').addEventListener('click', function(e) {
+    var btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    currentFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.filter === currentFilter);
+    });
+    currentTablePage = 1;
+    renderOrders();
+  });
+
+  // Sort headers
+  $('ordersTableHead').addEventListener('click', function(e) {
+    var th = e.target.closest('th[data-sort]');
+    if (!th) return;
+    var key = th.dataset.sort;
+    if (currentSort.key === key) {
+      currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSort.key = key;
+      currentSort.dir = 'asc';
+    }
+    renderOrders();
+  });
+
+  // ========== EXPORT CSV ==========
+  function csvEscape(val) {
+    var str = String(val);
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+
+  function exportCSV() {
+    var filtered = getFilteredOrders();
+    var csv = 'Customer,Order ID,Product,Amount,Status,Date\n';
+    filtered.forEach(function(o) {
+      csv += csvEscape(o.customer) + ',' + csvEscape('#' + o.id) + ',' + csvEscape(o.product) + ',' + csvEscape('$' + o.amount.toFixed(2)) + ',' + csvEscape(o.status) + ',' + csvEscape(formatDate(o.date)) + '\n';
+    });
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'salesflow-orders.csv';
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(url); }, 100);
+    showToast('CSV exported successfully');
+  }
+  $('exportBtnDash').addEventListener('click', exportCSV);
+  $('exportBtnOrders').addEventListener('click', exportCSV);
+
+  // ========== NEW ORDER ==========
+  function openNewOrderModal() {
+    $('newOrderName').value = '';
+    $('newOrderProduct').selectedIndex = 0;
+    $('newOrderAmount').value = '';
+    $('newOrderStatus').value = 'pending';
+    $('newOrderModal').classList.add('open');
+    updateNewOrderAmount();
+    focusModal('newOrderModal');
+  }
+  $('newOrderBtnDash').addEventListener('click', openNewOrderModal);
+  $('newOrderBtnOrders').addEventListener('click', openNewOrderModal);
+
+  $('newOrderProduct').addEventListener('change', updateNewOrderAmount);
+  function updateNewOrderAmount() {
+    var product = $('newOrderProduct').value;
+    $('newOrderAmount').value = productPrices[product] || '';
+  }
+
+  function addNewOrder() {
+    var name = $('newOrderName').value.trim();
+    if (!name) { $('newOrderName').focus(); return; }
+    var product = $('newOrderProduct').value;
+    var amount = parseFloat($('newOrderAmount').value) || 0;
+    var status = sanitizeStatus($('newOrderStatus').value);
+    var today = new Date().toISOString().split('T')[0];
+    orders.unshift({
+      customer: name,
+      id: 'ORD-' + orderIdCounter++,
+      product: product,
+      amount: amount,
+      status: status,
+      date: today
+    });
+    closeModal('newOrderModal');
+    showToast('Order created successfully');
+    if (currentPage === 'orders') renderOrders();
+    if (currentPage === 'dashboard') renderDashRecentOrders();
+  }
+  $('newOrderSubmitBtn').addEventListener('click', addNewOrder);
+  $('newOrderCancelBtn').addEventListener('click', function() { closeModal('newOrderModal'); });
+  $('newOrderCloseBtn').addEventListener('click', function() { closeModal('newOrderModal'); });
+  $('statModalCloseBtn').addEventListener('click', function() { closeModal('statModal'); });
+
+  // ========== MODALS ==========
+  function closeModal(id) { $(id).classList.remove('open'); }
+  function focusModal(id) {
+    var modal = $(id).querySelector('.modal');
+    if (!modal) return;
+    var focusable = modal.querySelector('input:not([type=hidden]), select, textarea') || modal.querySelector('button');
+    if (focusable) focusable.focus();
+  }
+  document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.classList.remove('open'); });
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(function(overlay) {
+        overlay.classList.remove('open');
+      });
+    }
+  });
+
+  // ========== TOAST ==========
+  var toastTimer;
+  function showToast(msg) {
+    var t = $('toast');
+    $('toastMsg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2500);
+  }
+
+  // ========== ANALYTICS PAGE ==========
+  function renderAnalytics() {
+    var products = [
+      { name:'Enterprise Plan', revenue:28400, pct:42 },
+      { name:'Pro Plan', revenue:18900, pct:28 },
+      { name:'Custom Solution', revenue:12800, pct:19 },
+      { name:'Starter Plan', revenue:7400, pct:11 }
+    ];
+    var colors = ['#6366f1','#06b6d4','#22c55e','#eab308'];
+
+    var prodEl = $('analyticsProducts');
+    prodEl.textContent = '';
+    products.forEach(function(p, i) {
+      var item = document.createElement('div');
+      item.className = 'analytics-item';
+      var nameSpan = document.createElement('span');
+      nameSpan.textContent = p.name;
+      var valSpan = document.createElement('span');
+      valSpan.style.fontWeight = '600';
+      valSpan.style.color = 'var(--text-bright)';
+      valSpan.textContent = '$' + p.revenue.toLocaleString();
+      item.appendChild(nameSpan);
+      item.appendChild(valSpan);
+      prodEl.appendChild(item);
+
+      var bar = document.createElement('div');
+      bar.className = 'analytics-bar';
+      var fill = document.createElement('div');
+      fill.className = 'analytics-bar-fill';
+      fill.style.width = p.pct + '%';
+      fill.style.background = colors[i];
+      bar.appendChild(fill);
+      prodEl.appendChild(bar);
+    });
+
+    var funnel = [
+      { stage:'Visitors', val:'12,400', pct:100 },
+      { stage:'Product Views', val:'8,200', pct:66 },
+      { stage:'Add to Cart', val:'3,100', pct:25 },
+      { stage:'Checkout', val:'1,800', pct:15 },
+      { stage:'Completed', val:'1,247', pct:10 }
+    ];
+    var funnelEl = $('analyticsFunnel');
+    funnelEl.textContent = '';
+    funnel.forEach(function(f) {
+      var item = document.createElement('div');
+      item.className = 'analytics-item';
+      var nameSpan = document.createElement('span');
+      nameSpan.textContent = f.stage;
+      var valSpan = document.createElement('span');
+      valSpan.style.fontWeight = '600';
+      valSpan.style.color = 'var(--text-bright)';
+      valSpan.textContent = f.val;
+      item.appendChild(nameSpan);
+      item.appendChild(valSpan);
+      funnelEl.appendChild(item);
+
+      var bar = document.createElement('div');
+      bar.className = 'analytics-bar';
+      var fill = document.createElement('div');
+      fill.className = 'analytics-bar-fill';
+      fill.style.width = f.pct + '%';
+      fill.style.background = 'var(--primary)';
+      bar.appendChild(fill);
+      funnelEl.appendChild(bar);
+    });
+
+    var regions = [
+      { name:'United States', val:'$18,240' },
+      { name:'United Kingdom', val:'$9,120' },
+      { name:'Germany', val:'$7,200' },
+      { name:'Canada', val:'$5,800' },
+      { name:'Australia', val:'$4,100' },
+      { name:'Other', val:'$3,835' }
+    ];
+    var regEl = $('analyticsRegions');
+    regEl.textContent = '';
+    regions.forEach(function(r) {
+      var item = document.createElement('div');
+      item.className = 'analytics-item';
+      var nameSpan = document.createElement('span');
+      nameSpan.textContent = r.name;
+      var valSpan = document.createElement('span');
+      valSpan.style.fontWeight = '600';
+      valSpan.style.color = 'var(--text-bright)';
+      valSpan.textContent = r.val;
+      item.appendChild(nameSpan);
+      item.appendChild(valSpan);
+      regEl.appendChild(item);
+    });
+
+    // Trend chart
+    var vals = [22,28,25,32,29,35,31,38,34,42,39,48];
+    var trendSvg = $('analyticsTrend');
+    var ns = 'http://www.w3.org/2000/svg';
+    var W = 500, H = 160;
+    var max = Math.max.apply(null, vals) * 1.2;
+    while (trendSvg.firstChild) trendSvg.removeChild(trendSvg.firstChild);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var barW = W / vals.length - 8;
+    vals.forEach(function(v, i) {
+      var h = (v / max) * (H - 20);
+      var x = i * (W / vals.length) + 4;
+
+      var rect = document.createElementNS(ns, 'rect');
+      rect.setAttribute('x', x); rect.setAttribute('y', H - h - 10);
+      rect.setAttribute('width', barW); rect.setAttribute('height', h);
+      rect.setAttribute('rx', '4'); rect.setAttribute('fill', '#6366f1');
+      rect.setAttribute('opacity', '0.7');
+
+      var animH = document.createElementNS(ns, 'animate');
+      animH.setAttribute('attributeName', 'height');
+      animH.setAttribute('from', '0'); animH.setAttribute('to', h);
+      animH.setAttribute('dur', '0.5s'); animH.setAttribute('begin', (i * 0.05) + 's');
+      animH.setAttribute('fill', 'freeze');
+      rect.appendChild(animH);
+
+      var animY = document.createElementNS(ns, 'animate');
+      animY.setAttribute('attributeName', 'y');
+      animY.setAttribute('from', H - 10); animY.setAttribute('to', H - h - 10);
+      animY.setAttribute('dur', '0.5s'); animY.setAttribute('begin', (i * 0.05) + 's');
+      animY.setAttribute('fill', 'freeze');
+      rect.appendChild(animY);
+
+      trendSvg.appendChild(rect);
+
+      var text = document.createElementNS(ns, 'text');
+      text.setAttribute('x', x + barW / 2); text.setAttribute('y', H);
+      text.setAttribute('fill', '#64748b'); text.setAttribute('font-size', '9');
+      text.setAttribute('text-anchor', 'middle');
+      text.textContent = months[i];
+      trendSvg.appendChild(text);
+    });
+  }
+
+  // ========== CUSTOMERS PAGE ==========
+  function renderCustomers() {
+    var tbody = $('customersTable');
+    tbody.textContent = '';
+    customersList.forEach(function(c) {
+      var ac = getAvatarColor(c.name);
+      var tr = document.createElement('tr');
+
+      var tdName = document.createElement('td');
+      var custDiv = document.createElement('div');
+      custDiv.className = 'td-customer';
+      var av = document.createElement('span');
+      av.className = 'avatar';
+      av.style.background = ac.bg;
+      av.style.color = ac.color;
+      av.textContent = getInitials(c.name);
+      custDiv.appendChild(av);
+      custDiv.appendChild(document.createTextNode(c.name));
+      tdName.appendChild(custDiv);
+      tr.appendChild(tdName);
+
+      var tdEmail = document.createElement('td');
+      tdEmail.textContent = c.email;
+      tr.appendChild(tdEmail);
+
+      var tdOrders = document.createElement('td');
+      tdOrders.textContent = c.orders;
+      tr.appendChild(tdOrders);
+
+      var tdSpent = document.createElement('td');
+      tdSpent.textContent = '$' + c.spent.toLocaleString();
+      tr.appendChild(tdSpent);
+
+      var tdStatus = document.createElement('td');
+      var statusSpan = document.createElement('span');
+      var custStatusClass = c.status === 'active' ? 'completed' : 'cancelled';
+      statusSpan.className = 'status ' + sanitizeStatus(custStatusClass);
+      statusSpan.textContent = c.status.charAt(0).toUpperCase() + c.status.slice(1);
+      tdStatus.appendChild(statusSpan);
+      tr.appendChild(tdStatus);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ========== INIT ==========
+  animateStats();
+  drawRevenueChart();
+  drawDonut();
+  drawGrowthChart();
+  renderDashRecentOrders();
+
+})();
+</script>
 </body>
 </html>
