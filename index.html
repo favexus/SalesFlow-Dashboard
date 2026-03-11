@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SalesFlow Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: #161922;
+    border-right: 1px solid #1e2130;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    padding: 0 12px 24px;
+    border-bottom: 1px solid #1e2130;
+    margin-bottom: 16px;
+  }
+  .logo span { color: #6366f1; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #64748b;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-item:hover { background: #1e2130; color: #cbd5e1; }
+  .nav-item.active { background: rgba(99,102,241,0.1); color: #818cf8; }
+  .nav-icon { width: 20px; text-align: center; }
+
+  /* Main */
+  .main { flex: 1; padding: 32px; overflow-y: auto; }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .header h1 { font-size: 24px; font-weight: 700; }
+  .header-right { display: flex; gap: 12px; align-items: center; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-ghost { background: #1e2130; color: #cbd5e1; border: 1px solid #2d3148; }
+  .date-badge {
+    background: #1e2130;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+
+  /* Stats Grid */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: #161922;
+    border: 1px solid #1e2130;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .stat-label { font-size: 13px; color: #64748b; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
+  .stat-change { font-size: 13px; margin-top: 6px; }
+  .stat-change.up { color: #22c55e; }
+  .stat-change.down { color: #ef4444; }
+
+  /* Charts Row */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: #161922;
+    border: 1px solid #1e2130;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-title span { color: #64748b; font-size: 13px; font-weight: 400; }
+
+  /* Chart SVG */
+  .chart-area { width: 100%; height: 200px; }
+
+  /* Donut */
+  .donut-container { display: flex; align-items: center; gap: 24px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Table */
+  .table-card { background: #161922; border: 1px solid #1e2130; border-radius: 12px; padding: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #1e2130;
+  }
+  td {
+    padding: 14px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #1e2130;
+  }
+  tr:last-child td { border-bottom: none; }
+  .status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .status.completed { background: rgba(34,197,94,0.1); color: #22c55e; }
+  .status.pending { background: rgba(234,179,8,0.1); color: #eab308; }
+  .status.cancelled { background: rgba(239,68,68,0.1); color: #ef4444; }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="logo">Sales<span>Flow</span></div>
+    <div class="nav-item active"><span class="nav-icon">&#9632;</span> Dashboard</div>
+    <div class="nav-item"><span class="nav-icon">&#9830;</span> Analytics</div>
+    <div class="nav-item"><span class="nav-icon">&#9679;</span> Customers</div>
+    <div class="nav-item"><span class="nav-icon">&#9733;</span> Products</div>
+    <div class="nav-item"><span class="nav-icon">&#9881;</span> Orders</div>
+    <div class="nav-item"><span class="nav-icon">&#9993;</span> Messages</div>
+    <div class="nav-item"><span class="nav-icon">&#9881;</span> Settings</div>
+  </nav>
+
+  <main class="main">
+    <div class="header">
+      <h1>Dashboard</h1>
+      <div class="header-right">
+        <div class="date-badge">Mar 1 - Mar 11, 2026</div>
+        <button class="btn btn-ghost">Export</button>
+        <button class="btn btn-primary">+ New Order</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">$48,295</div>
+        <div class="stat-change up">+12.5% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Orders</div>
+        <div class="stat-value">1,247</div>
+        <div class="stat-change up">+8.2% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Customers</div>
+        <div class="stat-value">856</div>
+        <div class="stat-change up">+5.1% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Refund Rate</div>
+        <div class="stat-value">2.4%</div>
+        <div class="stat-change down">+0.3% from last month</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-title">Revenue Overview <span>Last 7 days</span></div>
+        <svg class="chart-area" viewBox="0 0 600 200">
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          <line x1="0" y1="50" x2="600" y2="50" stroke="#1e2130" stroke-width="1"/>
+          <line x1="0" y1="100" x2="600" y2="100" stroke="#1e2130" stroke-width="1"/>
+          <line x1="0" y1="150" x2="600" y2="150" stroke="#1e2130" stroke-width="1"/>
+          <!-- Area -->
+          <path d="M0,160 C50,140 100,120 150,100 C200,80 250,90 300,60 C350,30 400,50 450,40 C500,30 550,20 600,35 L600,200 L0,200 Z" fill="url(#grad)"/>
+          <!-- Line -->
+          <path d="M0,160 C50,140 100,120 150,100 C200,80 250,90 300,60 C350,30 400,50 450,40 C500,30 550,20 600,35" fill="none" stroke="#6366f1" stroke-width="2.5"/>
+          <!-- Dots -->
+          <circle cx="0" cy="160" r="4" fill="#6366f1"/>
+          <circle cx="100" cy="120" r="4" fill="#6366f1"/>
+          <circle cx="200" cy="85" r="4" fill="#6366f1"/>
+          <circle cx="300" cy="60" r="4" fill="#6366f1"/>
+          <circle cx="400" cy="50" r="4" fill="#6366f1"/>
+          <circle cx="500" cy="28" r="4" fill="#6366f1"/>
+          <circle cx="600" cy="35" r="4" fill="#6366f1"/>
+          <!-- Labels -->
+          <text x="0" y="195" fill="#64748b" font-size="11">Mon</text>
+          <text x="95" y="195" fill="#64748b" font-size="11">Tue</text>
+          <text x="195" y="195" fill="#64748b" font-size="11">Wed</text>
+          <text x="295" y="195" fill="#64748b" font-size="11">Thu</text>
+          <text x="400" y="195" fill="#64748b" font-size="11">Fri</text>
+          <text x="498" y="195" fill="#64748b" font-size="11">Sat</text>
+          <text x="590" y="195" fill="#64748b" font-size="11">Sun</text>
+        </svg>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Traffic Source</div>
+        <div class="donut-container">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="55" fill="none" stroke="#1e2130" stroke-width="20"/>
+            <circle cx="70" cy="70" r="55" fill="none" stroke="#6366f1" stroke-width="20"
+              stroke-dasharray="138 208" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="55" fill="none" stroke="#06b6d4" stroke-width="20"
+              stroke-dasharray="86 260" stroke-dashoffset="-138" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="55" fill="none" stroke="#22c55e" stroke-width="20"
+              stroke-dasharray="52 294" stroke-dashoffset="-224" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="55" fill="none" stroke="#eab308" stroke-width="20"
+              stroke-dasharray="35 311" stroke-dashoffset="-276" transform="rotate(-90 70 70)"/>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div> Direct (40%)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#06b6d4"></div> Organic (25%)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Referral (15%)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div> Social (10%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="card-title">Recent Orders <span>View all</span></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="avatar" style="background:rgba(99,102,241,0.15);color:#818cf8">JD</span>John Davis</td>
+            <td>#ORD-7821</td>
+            <td>Enterprise Plan</td>
+            <td>$299.00</td>
+            <td><span class="status completed">Completed</span></td>
+            <td>Mar 11, 2026</td>
+          </tr>
+          <tr>
+            <td><span class="avatar" style="background:rgba(6,182,212,0.15);color:#06b6d4">SM</span>Sarah Miller</td>
+            <td>#ORD-7820</td>
+            <td>Pro Plan</td>
+            <td>$149.00</td>
+            <td><span class="status completed">Completed</span></td>
+            <td>Mar 10, 2026</td>
+          </tr>
+          <tr>
+            <td><span class="avatar" style="background:rgba(34,197,94,0.15);color:#22c55e">AK</span>Alex Kim</td>
+            <td>#ORD-7819</td>
+            <td>Starter Plan</td>
+            <td>$49.00</td>
+            <td><span class="status pending">Pending</span></td>
+            <td>Mar 10, 2026</td>
+          </tr>
+          <tr>
+            <td><span class="avatar" style="background:rgba(234,179,8,0.15);color:#eab308">LW</span>Lisa Wang</td>
+            <td>#ORD-7818</td>
+            <td>Enterprise Plan</td>
+            <td>$299.00</td>
+            <td><span class="status completed">Completed</span></td>
+            <td>Mar 9, 2026</td>
+          </tr>
+          <tr>
+            <td><span class="avatar" style="background:rgba(239,68,68,0.15);color:#ef4444">RM</span>Ryan Moore</td>
+            <td>#ORD-7817</td>
+            <td>Pro Plan</td>
+            <td>$149.00</td>
+            <td><span class="status cancelled">Cancelled</span></td>
+            <td>Mar 9, 2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>
